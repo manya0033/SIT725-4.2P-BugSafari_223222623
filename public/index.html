@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <meta
+    name="description"
+    content="BugSafari is an interactive field guide to common programming bugs."
+  >
+
+  <title>BugSafari | Coding Bug Field Guide</title>
+
+  <!-- Google Material Icons -->
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+  >
+
+  <!-- Materialize CSS -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+  >
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body>
+
+  <!-- Navigation bar -->
+  <nav class="bug-navbar">
+    <div class="nav-wrapper container">
+      <a href="#" class="brand-logo">
+        <i class="material-icons">bug_report</i>
+        BugSafari
+      </a>
+
+      <ul class="right hide-on-med-and-down">
+        <li>
+          <a href="#bug-guide">Bug Guide</a>
+        </li>
+
+        <li>
+          <a href="#about">About</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Introductory hero section -->
+  <header class="hero-section">
+    <div class="container center-align">
+      <span class="hero-label">Developer Field Guide</span>
+
+      <h1>Track down bugs before they track down you.</h1>
+
+      <p class="hero-description">
+        Explore common coding errors, recognise their symptoms and learn
+        practical ways to fix them.
+      </p>
+
+      <a href="#bug-guide" class="btn-large waves-effect waves-light">
+        Explore the Bug Guide
+        <i class="material-icons right">travel_explore</i>
+      </a>
+    </div>
+  </header>
+
+  <!-- Bug cards will eventually be inserted here using JavaScript -->
+  <main id="bug-guide" class="section">
+    <div class="container">
+      <div class="section-heading center-align">
+        <h2>Common Bugs in the Wild</h2>
+
+        <p>
+          The cards in this section will be loaded from our Express GET
+          endpoint.
+        </p>
+      </div>
+
+      <div id="bug-card-container" class="row">
+        <div class="col s12 center-align loading-message">
+          <i class="material-icons medium">construction</i>
+          <p>Bug records will appear here soon.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- About section -->
+  <section id="about" class="about-section">
+    <div class="container center-align">
+      <h2>About BugSafari</h2>
+
+      <p>
+        BugSafari is a small Express and Materialize application created
+        for SIT725 Task 3.2P. It helps beginner developers identify and
+        understand common programming bugs.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="page-footer bug-footer">
+    <div class="footer-copyright">
+      <div class="container center-align">
+        © 2026 BugSafari | SIT725 Task 3.2P
+      </div>
+    </div>
+  </footer>
+
+  <!-- Materialize JavaScript -->
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"
+  ></script>
+
+  <!-- Custom JavaScript -->
+  <script src="js/scripts.js"></script>
+</body>
+</html>

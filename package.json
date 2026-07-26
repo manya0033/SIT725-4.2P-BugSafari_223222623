@@ -1,0 +1,23 @@
+{
+  "name": "sit725-3.2p-bugsafari_223222623",
+  "version": "1.0.0",
+  "description": "Materialize and Express web application for SIT725 Task 3.2P",
+  "main": "index.js",
+  "scripts": {
+  "start": "node server.js"
+},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623/issues"
+  },
+  "homepage": "https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
