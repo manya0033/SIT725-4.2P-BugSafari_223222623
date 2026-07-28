@@ -1,118 +1,154 @@
-// Import required modules
 const express = require("express");
 const path = require("path");
+const mongoose = require("mongoose");
+const Bug = require("./models/Bug");
 
-// Create the Express application
 const app = express();
 
-// Use the hosting platform's port or port 3000 locally
 const PORT = process.env.PORT || 3000;
 
-// BugSafari data returned by the REST endpoint
-const bugList = [
-  {
-    id: 1,
-    title: "The Infinite Loop",
-    image: "images/infinite-loop.svg",
-    link: "Inspect this bug",
-    category: "Logic Error",
-    severity: "High",
-    description:
-      "A loop continues forever because its stopping condition is never reached.",
-    symptom:
-      "The application freezes, becomes unresponsive or repeatedly performs the same action.",
-    fix:
-      "Check the loop condition and confirm that the controlling value changes during each iteration."
-  },
-  {
-    id: 2,
-    title: "The Off-by-One Error",
-    image: "images/off-by-one.svg",
-    link: "Inspect this bug",
-    category: "Boundary Error",
-    severity: "Medium",
-    description:
-      "The program processes one item too many or one item too few.",
-    symptom:
-      "The first or last element of an array is skipped, repeated or accessed incorrectly.",
-    fix:
-      "Review the starting value, comparison operator and final index used by the loop."
-  },
-  {
-    id: 3,
-    title: "The Silent Undefined",
-    image: "images/undefined.svg",
-    link: "Inspect this bug",
-    category: "Data Error",
-    severity: "Medium",
-    description:
-      "A variable or property is used before it contains a valid value.",
-    symptom:
-      "The page displays missing information or reports that a property cannot be read.",
-    fix:
-      "Check spelling, initialise variables and confirm that objects contain the expected properties."
-  },
-  {
-    id: 4,
-    title: "The Broken API Path",
-    image: "images/api-path.svg",
-    link: "Inspect this bug",
-    category: "Network Error",
-    severity: "High",
-    description:
-      "The client sends its request to an incorrect or unavailable endpoint.",
-    symptom:
-      "The browser reports a 404 error and the expected data does not appear.",
-    fix:
-      "Compare the client request URL with the route declared in the Express server."
-  },
-  {
-    id: 5,
-    title: "The Type Mismatch",
-    image: "images/type-mismatch.svg",
-    link: "Inspect this bug",
-    category: "Type Error",
-    severity: "Medium",
-    description:
-      "The application performs an operation using incompatible data types.",
-    symptom:
-      "Calculations produce unexpected results or a function rejects the supplied value.",
-    fix:
-      "Inspect the value with typeof and convert it to the required type before using it."
-  },
-  {
-    id: 6,
-    title: "The Race Condition",
-    image: "images/race-condition.svg",
-    link: "Inspect this bug",
-    category: "Timing Error",
-    severity: "Critical",
-    description:
-      "Multiple asynchronous operations compete to update the same data.",
-    symptom:
-      "The result changes unpredictably depending on which operation finishes first.",
-    fix:
-      "Control the operation order using promises, async-await or an appropriate locking strategy."
-  }
-];
+const DATABASE_URL =
+  process.env.MONGODB_URI ||
+  "mongodb://127.0.0.1:27017/bugsafariDB";
 
-// Allow Express to read JSON and form data
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// GET REST endpoint for all BugSafari records
-app.get("/api/bugs", (request, response) => {
-  response.status(200).json({
-    statusCode: 200,
-    data: bugList,
-    message: "Bug records retrieved successfully"
-  });
+/**
+ * Convert MongoDB fields into the card structure
+ * expected by the client-side application.
+ */
+const formatBugForClient = (bug) => ({
+  id: bug._id,
+  title: bug.bugName,
+  image: bug.illustrationPath,
+  link: "Inspect this bug",
+  category: bug.bugCategory,
+  severity: bug.severityLevel,
+  description: bug.overview,
+  symptom: bug.commonSymptom,
+  fix: bug.recommendedSolution,
+  isResolved: bug.isResolved,
+  createdAt: bug.createdAt
 });
 
-// Serve HTML, CSS, JavaScript and images from the public folder
+/**
+ * GET /api/bugs
+ * Retrieve all bug records from MongoDB.
+ */
+app.get("/api/bugs", async (request, response) => {
+  try {
+    const databaseBugs = await Bug.find({}).sort({
+      createdAt: 1
+    });
+
+    response.status(200).json({
+      statusCode: 200,
+      data: databaseBugs.map(formatBugForClient),
+      message: "Bug records retrieved from MongoDB successfully"
+    });
+  } catch (error) {
+    console.error("Unable to retrieve bug records:", error);
+
+    response.status(500).json({
+      statusCode: 500,
+      data: [],
+      message: "Unable to retrieve bug records from MongoDB"
+    });
+  }
+});
+
+// Only these local illustrations can be saved
+const allowedIllustrations = new Set([
+  "images/infinite-loop.svg",
+  "images/off-by-one.svg",
+  "images/undefined.svg",
+  "images/api-path.svg",
+  "images/type-mismatch.svg",
+  "images/race-condition.svg"
+]);
+
+/**
+ * POST /api/bugs
+ * Validate and save a new record to MongoDB.
+ */
+app.post("/api/bugs", async (request, response) => {
+  try {
+    const {
+      bugName,
+      bugCategory,
+      severityLevel,
+      overview,
+      commonSymptom,
+      recommendedSolution,
+      illustrationPath
+    } = request.body;
+
+    const safeIllustrationPath = allowedIllustrations.has(
+      illustrationPath
+    )
+      ? illustrationPath
+      : "images/undefined.svg";
+
+    const newBug = new Bug({
+      bugName,
+      bugCategory,
+      severityLevel,
+      overview,
+      commonSymptom,
+      recommendedSolution,
+      illustrationPath: safeIllustrationPath,
+      isResolved: false
+    });
+
+    const savedBug = await newBug.save();
+
+    response.status(201).json({
+      statusCode: 201,
+      data: formatBugForClient(savedBug),
+      message: "New bug record saved to MongoDB successfully"
+    });
+  } catch (error) {
+    console.error("Unable to save bug record:", error.message);
+
+    if (error.name === "ValidationError") {
+      return response.status(400).json({
+        statusCode: 400,
+        data: null,
+        message: error.message
+      });
+    }
+
+    response.status(500).json({
+      statusCode: 500,
+      data: null,
+      message: "Unable to save the bug record"
+    });
+  }
+});
+
+// Serve the browser-side application
 app.use(express.static(path.join(__dirname, "public")));
 
-// Start the Express server
-app.listen(PORT, () => {
-  console.log(`BugSafari is running at http://localhost:${PORT}`);
-});
+/**
+ * Connect to MongoDB before starting Express.
+ */
+const startServer = async () => {
+  try {
+    await mongoose.connect(DATABASE_URL);
+
+    console.log("Connected to MongoDB database: bugsafariDB");
+
+    app.listen(PORT, () => {
+      console.log(
+        `BugSafari Database Edition is running at http://localhost:${PORT}`
+      );
+    });
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

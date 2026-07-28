@@ -10,10 +10,10 @@
 
   <meta
     name="description"
-    content="BugSafari is an interactive field guide to common programming bugs."
+    content="BugSafari is an interactive MongoDB and Express application for exploring and reporting common programming bugs."
   >
 
-  <title>BugSafari | Coding Bug Field Guide</title>
+  <title>BugSafari | Database Edition</title>
 
   <!-- Google Material Icons -->
   <link
@@ -36,82 +36,450 @@
   <!-- Navigation bar -->
   <nav class="bug-navbar">
     <div class="nav-wrapper container">
+
       <a href="#" class="brand-logo">
         <i class="material-icons">bug_report</i>
         BugSafari
       </a>
 
       <ul class="right hide-on-med-and-down">
+
         <li>
-          <a href="#bug-guide">Bug Guide</a>
+          <a href="#bug-guide">
+            Bug Guide
+          </a>
         </li>
 
         <li>
-          <a href="#about">About</a>
+          <a
+            href="#report-bug-modal"
+            class="modal-trigger"
+          >
+            Report Bug
+          </a>
         </li>
+
+        <li>
+          <a href="#about">
+            About
+          </a>
+        </li>
+
       </ul>
     </div>
   </nav>
 
-  <!-- Introductory hero section -->
+  <!-- Hero section -->
   <header class="hero-section">
     <div class="container center-align">
-      <span class="hero-label">Developer Field Guide</span>
 
-      <h1>Track down bugs before they track down you.</h1>
+      <span class="hero-label">
+        MongoDB Developer Field Guide
+      </span>
+
+      <h1>
+        Track down bugs before they track down you.
+      </h1>
 
       <p class="hero-description">
-        Explore common coding errors, recognise their symptoms and learn
-        practical ways to fix them.
+        Explore common coding errors, recognise their symptoms,
+        learn practical solutions and report new bugs to the
+        BugSafari database.
       </p>
 
-      <a href="#bug-guide" class="btn-large waves-effect waves-light">
-        Explore the Bug Guide
-        <i class="material-icons right">travel_explore</i>
-      </a>
+      <div class="hero-actions">
+
+        <a
+          href="#bug-guide"
+          class="btn-large waves-effect waves-light"
+        >
+          Explore the Bug Guide
+
+          <i class="material-icons right">
+            travel_explore
+          </i>
+        </a>
+
+        <a
+          href="#report-bug-modal"
+          class="btn-large waves-effect waves-light modal-trigger report-bug-button"
+        >
+          Report a Bug
+
+          <i class="material-icons right">
+            add_circle_outline
+          </i>
+        </a>
+
+      </div>
     </div>
   </header>
 
-  <!-- Bug cards will eventually be inserted here using JavaScript -->
+  <!-- Bug guide -->
   <main id="bug-guide" class="section">
+
     <div class="container">
+
       <div class="section-heading center-align">
-        <h2>Common Bugs in the Wild</h2>
+
+        <h2>
+          Common Bugs in the Wild
+        </h2>
 
         <p>
-          The cards in this section will be loaded from our Express GET
-          endpoint.
+          These cards are retrieved from the BugSafari MongoDB
+          database through the Express GET endpoint.
         </p>
+
       </div>
 
+      <!-- Cards are inserted here by scripts.js -->
       <div id="bug-card-container" class="row">
+
         <div class="col s12 center-align loading-message">
-          <i class="material-icons medium">construction</i>
-          <p>Bug records will appear here soon.</p>
+
+          <div class="preloader-wrapper small active">
+
+            <div class="spinner-layer spinner-teal-only">
+
+              <div class="circle-clipper left">
+                <div class="circle"></div>
+              </div>
+
+              <div class="gap-patch">
+                <div class="circle"></div>
+              </div>
+
+              <div class="circle-clipper right">
+                <div class="circle"></div>
+              </div>
+
+            </div>
+          </div>
+
+          <p>
+            Loading BugSafari records from MongoDB...
+          </p>
+
         </div>
+
       </div>
     </div>
   </main>
 
+  <!-- Report a Bug modal -->
+  <div
+    id="report-bug-modal"
+    class="modal modal-fixed-footer report-bug-modal"
+  >
+
+    <form id="report-bug-form">
+
+      <div class="modal-content">
+
+        <div class="modal-heading">
+
+          <i class="material-icons medium">
+            bug_report
+          </i>
+
+          <div>
+
+            <h4>
+              Report a New Bug
+            </h4>
+
+            <p>
+              Add a programming bug to the BugSafari MongoDB
+              collection.
+            </p>
+
+          </div>
+        </div>
+
+        <div class="row">
+
+          <!-- Bug name -->
+          <div class="input-field col s12 m7">
+
+            <i class="material-icons prefix">
+              label
+            </i>
+
+            <input
+              id="bugName"
+              name="bugName"
+              type="text"
+              minlength="3"
+              maxlength="80"
+              required
+            >
+
+            <label for="bugName">
+              Bug name
+            </label>
+
+            <span
+              class="helper-text"
+              data-error="Enter a bug name containing at least three characters."
+            >
+              Example: The Null Reference
+            </span>
+
+          </div>
+
+          <!-- Category -->
+          <div class="input-field col s12 m5">
+
+            <i class="material-icons prefix">
+              category
+            </i>
+
+            <input
+              id="bugCategory"
+              name="bugCategory"
+              type="text"
+              maxlength="50"
+              required
+            >
+
+            <label for="bugCategory">
+              Bug category
+            </label>
+
+            <span
+              class="helper-text"
+              data-error="Enter a bug category."
+            >
+              Example: Runtime Error
+            </span>
+
+          </div>
+
+          <!-- Severity -->
+          <div class="input-field col s12 m6">
+
+            <select
+              id="severityLevel"
+              name="severityLevel"
+              required
+            >
+
+              <option value="" disabled selected>
+                Select severity
+              </option>
+
+              <option value="Low">
+                Low
+              </option>
+
+              <option value="Medium">
+                Medium
+              </option>
+
+              <option value="High">
+                High
+              </option>
+
+              <option value="Critical">
+                Critical
+              </option>
+
+            </select>
+
+            <label for="severityLevel">
+              Severity level
+            </label>
+
+          </div>
+
+          <!-- Illustration -->
+          <div class="input-field col s12 m6">
+
+            <select
+              id="illustrationPath"
+              name="illustrationPath"
+              required
+            >
+
+              <option value="" disabled selected>
+                Select an illustration
+              </option>
+
+              <option value="images/infinite-loop.svg">
+                Workflow illustration
+              </option>
+
+              <option value="images/off-by-one.svg">
+                Data processing illustration
+              </option>
+
+              <option value="images/undefined.svg">
+                Question illustration
+              </option>
+
+              <option value="images/api-path.svg">
+                Server illustration
+              </option>
+
+              <option value="images/type-mismatch.svg">
+                Data analysis illustration
+              </option>
+
+              <option value="images/race-condition.svg">
+                Time management illustration
+              </option>
+
+            </select>
+
+            <label for="illustrationPath">
+              Card illustration
+            </label>
+
+          </div>
+
+          <!-- Overview -->
+          <div class="input-field col s12">
+
+            <i class="material-icons prefix">
+              description
+            </i>
+
+            <textarea
+              id="overview"
+              name="overview"
+              class="materialize-textarea"
+              maxlength="300"
+              required
+            ></textarea>
+
+            <label for="overview">
+              Short overview
+            </label>
+
+            <span
+              class="helper-text"
+              data-error="Please provide a short overview."
+            >
+              Briefly explain what the bug does.
+            </span>
+
+          </div>
+
+          <!-- Symptom -->
+          <div class="input-field col s12">
+
+            <i class="material-icons prefix">
+              visibility
+            </i>
+
+            <textarea
+              id="commonSymptom"
+              name="commonSymptom"
+              class="materialize-textarea"
+              maxlength="400"
+              required
+            ></textarea>
+
+            <label for="commonSymptom">
+              Typical symptom
+            </label>
+
+            <span
+              class="helper-text"
+              data-error="Please describe a typical symptom."
+            >
+              Explain what a developer may observe when the bug occurs.
+            </span>
+
+          </div>
+
+          <!-- Recommended solution -->
+          <div class="input-field col s12">
+
+            <i class="material-icons prefix">
+              build
+            </i>
+
+            <textarea
+              id="recommendedSolution"
+              name="recommendedSolution"
+              class="materialize-textarea"
+              maxlength="500"
+              required
+            ></textarea>
+
+            <label for="recommendedSolution">
+              Recommended solution
+            </label>
+
+            <span
+              class="helper-text"
+              data-error="Please provide a recommended solution."
+            >
+              Describe a practical way to investigate or fix the bug.
+            </span>
+
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+
+        <button
+          type="button"
+          class="modal-close waves-effect btn-flat"
+        >
+          Cancel
+        </button>
+
+        <button
+          id="submit-bug-button"
+          type="submit"
+          class="btn waves-effect waves-light"
+        >
+          Save to Database
+
+          <i class="material-icons right">
+            save
+          </i>
+        </button>
+
+      </div>
+
+    </form>
+  </div>
+
   <!-- About section -->
   <section id="about" class="about-section">
+
     <div class="container center-align">
-      <h2>About BugSafari</h2>
+
+      <h2>
+        About BugSafari
+      </h2>
 
       <p>
-        BugSafari is a small Express and Materialize application created
-        for SIT725 Task 3.2P. It helps beginner developers identify and
-        understand common programming bugs.
+        BugSafari Database Edition is an Express, MongoDB,
+        Mongoose and Materialize application created for SIT725
+        Task 4.2P. Bug records are stored persistently in MongoDB,
+        retrieved through a server-side GET endpoint and added
+        through a validated POST endpoint.
       </p>
+
     </div>
   </section>
 
   <!-- Footer -->
   <footer class="page-footer bug-footer">
+
     <div class="footer-copyright">
+
       <div class="container center-align">
-        © 2026 BugSafari | SIT725 Task 3.2P
+        © 2026 BugSafari Database Edition | SIT725 Task 4.2P
       </div>
+
     </div>
   </footer>
 
@@ -122,5 +490,6 @@
 
   <!-- Custom JavaScript -->
   <script src="js/scripts.js"></script>
+
 </body>
 </html>

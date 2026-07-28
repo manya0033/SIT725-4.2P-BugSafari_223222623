@@ -1,23 +1,32 @@
 {
-  "name": "sit725-3.2p-bugsafari_223222623",
+  "name": "sit725-4.2p-bugsafari-db-223222623",
   "version": "1.0.0",
-  "description": "Materialize and Express web application for SIT725 Task 3.2P",
-  "main": "index.js",
+  "description": "MongoDB database version of BugSafari for SIT725 Task 4.2P",
+  "main": "server.js",
   "scripts": {
-  "start": "node server.js"
-},
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623.git"
+    "url": "git+https://github.com/manya0033/SIT725-4.2P-BugSafari_223222623.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "SIT725",
+    "Express",
+    "MongoDB",
+    "Mongoose",
+    "Materialize",
+    "BugSafari"
+  ],
+  "author": "Manya Mahajan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623/issues"
+    "url": "https://github.com/manya0033/SIT725-4.2P-BugSafari_223222623/issues"
   },
-  "homepage": "https://github.com/manya0033/SIT725-3.2P-BugSafari_223222623#readme",
+  "homepage": "https://github.com/manya0033/SIT725-4.2P-BugSafari_223222623#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "mongoose": "^9.8.0"
   }
 }

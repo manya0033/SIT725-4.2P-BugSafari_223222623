@@ -1,10 +1,43 @@
-// Wait until the HTML page has fully loaded
+/**
+ * BugSafari Database Edition
+ * Client-side JavaScript for retrieving and submitting MongoDB records.
+ */
+
 document.addEventListener("DOMContentLoaded", () => {
+  initialiseMaterializeComponents();
+  initialiseBugForm();
   loadBugCards();
 });
 
 /**
- * Requests the bug records from the Express GET endpoint.
+ * Initialise Materialize modal and select components.
+ */
+const initialiseMaterializeComponents = () => {
+  const modals = document.querySelectorAll(".modal");
+  M.Modal.init(modals, {
+    dismissible: true,
+    opacity: 0.5
+  });
+
+  const selects = document.querySelectorAll("select");
+  M.FormSelect.init(selects);
+};
+
+/**
+ * Attach the submit event to the Report a Bug form.
+ */
+const initialiseBugForm = () => {
+  const bugForm = document.getElementById("report-bug-form");
+
+  if (!bugForm) {
+    return;
+  }
+
+  bugForm.addEventListener("submit", submitBugForm);
+};
+
+/**
+ * Request all bug records from MongoDB through the Express API.
  */
 const loadBugCards = async () => {
   const cardContainer = document.getElementById("bug-card-container");
@@ -13,7 +46,9 @@ const loadBugCards = async () => {
     const response = await fetch("/api/bugs");
 
     if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
+      throw new Error(
+        `Unable to retrieve bugs. Server returned ${response.status}.`
+      );
     }
 
     const result = await response.json();
@@ -36,7 +71,8 @@ const loadBugCards = async () => {
           <h5>Unable to load the Bug Guide</h5>
 
           <p>
-            Please check that the Express server is running and try again.
+            Confirm that Express and MongoDB are running, then refresh
+            the page.
           </p>
         </div>
       </div>
@@ -45,12 +81,24 @@ const loadBugCards = async () => {
 };
 
 /**
- * Generates one Materialize card for every bug returned by the server.
+ * Display all records returned by the server.
  *
- * @param {Array} bugs - Bug records received from /api/bugs.
+ * @param {Array} bugs MongoDB bug records formatted by the Express server.
  */
 const displayBugCards = (bugs) => {
   const cardContainer = document.getElementById("bug-card-container");
+
+  if (bugs.length === 0) {
+    cardContainer.innerHTML = `
+      <div class="col s12 center-align">
+        <i class="material-icons medium">search_off</i>
+        <h5>No bug records found</h5>
+        <p>Use the Report a Bug form to create the first record.</p>
+      </div>
+    `;
+
+    return;
+  }
 
   cardContainer.innerHTML = bugs
     .map((bug) => createBugCard(bug))
@@ -58,10 +106,10 @@ const displayBugCards = (bugs) => {
 };
 
 /**
- * Creates the HTML for an individual BugSafari card.
+ * Generate one Materialize card.
  *
- * @param {Object} bug - A single bug record.
- * @returns {string} Materialize card markup.
+ * @param {Object} bug Individual bug record.
+ * @returns {string} Materialize card HTML.
  */
 const createBugCard = (bug) => {
   const severityClass = getSeverityClass(bug.severity);
@@ -70,25 +118,27 @@ const createBugCard = (bug) => {
     <div class="col s12 m6 l4">
       <article class="card bug-card hoverable">
 
-        <div class="card-image waves-effect waves-block waves-light bug-image-area">
+        <div
+          class="card-image waves-effect waves-block waves-light bug-image-area"
+        >
           <img
             class="activator bug-card-image"
-            src="${bug.image}"
-            alt="Illustration representing ${bug.title}"
+            src="${escapeHtml(bug.image)}"
+            alt="Illustration representing ${escapeHtml(bug.title)}"
           >
 
           <span class="severity-badge ${severityClass}">
-            ${bug.severity}
+            ${escapeHtml(bug.severity)}
           </span>
         </div>
 
         <div class="card-content">
           <span class="bug-category">
-            ${bug.category}
+            ${escapeHtml(bug.category)}
           </span>
 
           <span class="card-title activator">
-            ${bug.title}
+            ${escapeHtml(bug.title)}
 
             <i class="material-icons right">
               more_vert
@@ -96,7 +146,7 @@ const createBugCard = (bug) => {
           </span>
 
           <p class="bug-description">
-            ${bug.description}
+            ${escapeHtml(bug.description)}
           </p>
         </div>
 
@@ -104,9 +154,9 @@ const createBugCard = (bug) => {
           <button
             type="button"
             class="activator inspect-button"
-            aria-label="Inspect ${bug.title}"
+            aria-label="Inspect ${escapeHtml(bug.title)}"
           >
-            ${bug.link}
+            Inspect this bug
 
             <i class="material-icons tiny">
               arrow_forward
@@ -116,7 +166,7 @@ const createBugCard = (bug) => {
 
         <div class="card-reveal">
           <span class="card-title">
-            ${bug.title}
+            ${escapeHtml(bug.title)}
 
             <i class="material-icons right">
               close
@@ -124,7 +174,9 @@ const createBugCard = (bug) => {
           </span>
 
           <span class="bug-category reveal-category">
-            ${bug.category} · ${bug.severity} severity
+            ${escapeHtml(bug.category)}
+            ·
+            ${escapeHtml(bug.severity)} severity
           </span>
 
           <div class="bug-detail">
@@ -133,7 +185,9 @@ const createBugCard = (bug) => {
               Typical symptom
             </h6>
 
-            <p>${bug.symptom}</p>
+            <p>
+              ${escapeHtml(bug.symptom)}
+            </p>
           </div>
 
           <div class="bug-detail">
@@ -142,7 +196,9 @@ const createBugCard = (bug) => {
               Recommended fix
             </h6>
 
-            <p>${bug.fix}</p>
+            <p>
+              ${escapeHtml(bug.fix)}
+            </p>
           </div>
         </div>
 
@@ -152,12 +208,137 @@ const createBugCard = (bug) => {
 };
 
 /**
- * Returns a CSS class matching the bug severity.
+ * Submit a new BugSafari record to MongoDB.
  *
- * @param {string} severity - Severity supplied by the server.
- * @returns {string} CSS class for the badge.
+ * @param {SubmitEvent} event Form submission event.
  */
-const getSeverityClass = (severity) => {
+const submitBugForm = async (event) => {
+  event.preventDefault();
+
+  const bugForm = event.currentTarget;
+  const submitButton = document.getElementById("submit-bug-button");
+
+  if (!bugForm.checkValidity()) {
+    bugForm.reportValidity();
+    return;
+  }
+
+  const newBug = {
+    bugName: document.getElementById("bugName").value.trim(),
+    bugCategory: document.getElementById("bugCategory").value.trim(),
+    severityLevel: document.getElementById("severityLevel").value,
+    illustrationPath: document.getElementById("illustrationPath").value,
+    overview: document.getElementById("overview").value.trim(),
+    commonSymptom:
+      document.getElementById("commonSymptom").value.trim(),
+    recommendedSolution:
+      document.getElementById("recommendedSolution").value.trim()
+  };
+
+  setSubmitButtonLoading(submitButton, true);
+
+  try {
+    const response = await fetch("/api/bugs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newBug)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        result.message || `Request failed with status ${response.status}.`
+      );
+    }
+
+    M.toast({
+      html: "Bug saved to MongoDB successfully!",
+      classes: "green darken-2"
+    });
+
+    closeAndResetBugForm(bugForm);
+    await loadBugCards();
+  } catch (error) {
+    console.error("Unable to save the bug record:", error);
+
+    M.toast({
+      html: escapeHtml(error.message),
+      classes: "red darken-2"
+    });
+  } finally {
+    setSubmitButtonLoading(submitButton, false);
+  }
+};
+
+/**
+ * Close the modal and reset all form fields.
+ *
+ * @param {HTMLFormElement} bugForm Bug reporting form.
+ */
+const closeAndResetBugForm = (bugForm) => {
+  bugForm.reset();
+
+  document.querySelectorAll("#report-bug-form select").forEach((select) => {
+    const currentInstance = M.FormSelect.getInstance(select);
+
+    if (currentInstance) {
+      currentInstance.destroy();
+    }
+
+    select.selectedIndex = 0;
+    M.FormSelect.init(select);
+  });
+
+  M.updateTextFields();
+
+  document
+    .querySelectorAll("#report-bug-form textarea")
+    .forEach((textarea) => {
+      M.textareaAutoResize(textarea);
+    });
+
+  const modalElement = document.getElementById("report-bug-modal");
+  const modalInstance = M.Modal.getInstance(modalElement);
+
+  if (modalInstance) {
+    modalInstance.close();
+  }
+};
+
+/**
+ * Change the submit button while a record is being saved.
+ *
+ * @param {HTMLButtonElement} button Submit button.
+ * @param {boolean} isLoading Whether the request is running.
+ */
+const setSubmitButtonLoading = (button, isLoading) => {
+  if (!button) {
+    return;
+  }
+
+  button.disabled = isLoading;
+
+  button.innerHTML = isLoading
+    ? `
+      Saving...
+      <i class="material-icons right">hourglass_top</i>
+    `
+    : `
+      Save to Database
+      <i class="material-icons right">save</i>
+    `;
+};
+
+/**
+ * Return the CSS class for a severity badge.
+ *
+ * @param {string} severity Severity supplied by MongoDB.
+ * @returns {string} Severity CSS class.
+ */
+const getSeverityClass = (severity = "") => {
   switch (severity.toLowerCase()) {
     case "critical":
       return "severity-critical";
@@ -171,4 +352,21 @@ const getSeverityClass = (severity) => {
     default:
       return "severity-low";
   }
+};
+
+/**
+ * Encode text before inserting it into generated HTML.
+ *
+ * @param {*} value Value received from the database.
+ * @returns {string} HTML-safe value.
+ */
+const escapeHtml = (value) => {
+  const text = String(value ?? "");
+
+  return text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 };
